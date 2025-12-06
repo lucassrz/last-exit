@@ -43,30 +43,26 @@ public sealed class PlayerAnimator : Component
 	{
 		// Récupère la vélocité du Rigidbody si disponible
 		var rb = _controller?.Components.Get<Rigidbody>();
-		Vector3 velocity = rb != null ? rb.Velocity : Vector3.Zero;
+		Vector3 worldVelocity = rb != null ? rb.Velocity : Vector3.Zero;
+
+		// Transforme la vélocité mondiale en vélocité locale (relative à la rotation du body)
+		var localVelocity = BodyRenderer.WorldRotation.Inverse * worldVelocity;
 
 		// Calcule les paramètres d'animation
-		var horizontalVelocity = new Vector3( velocity.x, velocity.y, 0 );
+		var horizontalVelocity = new Vector3( worldVelocity.x, worldVelocity.y, 0 );
 		float speed = horizontalVelocity.Length;
 
-		// Paramètres pour l'AnimationGraph Citizen
+		// Paramètres pour l'AnimationGraph Citizen - utilise la vélocité locale
 		BodyRenderer.Set( "b_grounded", true );
 		BodyRenderer.Set( "move_groundspeed", speed );
-		BodyRenderer.Set( "move_x", velocity.x );
-		BodyRenderer.Set( "move_y", velocity.y );
-		BodyRenderer.Set( "move_z", velocity.z );
+		BodyRenderer.Set( "move_x", localVelocity.x );
+		BodyRenderer.Set( "move_y", localVelocity.y );
+		BodyRenderer.Set( "move_z", localVelocity.z );
 		BodyRenderer.Set( "wish_groundspeed", speed );
-		BodyRenderer.Set( "wish_x", velocity.x );
-		BodyRenderer.Set( "wish_y", velocity.y );
+		BodyRenderer.Set( "wish_x", localVelocity.x );
+		BodyRenderer.Set( "wish_y", localVelocity.y );
 		BodyRenderer.Set( "wish_z", 0f );
 
-		// Debug toutes les 60 frames pour éviter le spam
-		_frameCount++;
-		if ( _frameCount % 60 == 0 )
-		{
-			Log.Info( $"[PlayerAnimator] Speed: {speed:F2} | Velocity: {velocity}" );
-		}
-
-		_lastVelocity = velocity;
+		_lastVelocity = worldVelocity;
 	}
 }
