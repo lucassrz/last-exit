@@ -262,7 +262,7 @@
       "__version": 1,
       "Flags": 0,
       "Name": "Player Controller",
-      "Position": "0,0,30",
+      "Position": "0,0,5",
       "Rotation": "0,0,0,1",
       "Scale": "1,1,1",
       "Tags": "",
@@ -291,19 +291,13 @@
           "__type": "LastExit.PlayerAnimator",
           "__guid": "288fd835-5288-4390-96bc-4d67edf27223",
           "__enabled": true,
-          "MaxSpeed": 320,
+          "BodyRenderer": null,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "Renderer": {
-            "_type": "component",
-            "component_id": "77f251c8-adfd-46cb-8454-853f717e0fec",
-            "go": "68f4fa52-a7e7-46fa-b589-76ac3571f52e",
-            "component_type": "SkinnedModelRenderer"
-          }
+          "OnComponentUpdate": null
         },
         {
           "__type": "Sandbox.Rigidbody",

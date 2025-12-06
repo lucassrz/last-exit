@@ -17,18 +17,12 @@ public sealed class PlayerAnimator : Component
 	{
 		// Trouve le controller
 		_controller = Components.Get<PersonnalPlayerController>( FindMode.EnabledInSelfAndDescendants );
-		if ( _controller == null )
-		{
-			_controller = Components.GetInAncestors<PersonnalPlayerController>();
-		}
 
 		// Trouve le renderer automatiquement s'il n'est pas assigné
 		if ( BodyRenderer == null )
 		{
 			BodyRenderer = Components.Get<SkinnedModelRenderer>( FindMode.EnabledInSelfAndDescendants );
 		}
-
-		Log.Info( $"[PlayerAnimator] Controller: {_controller != null}, Renderer: {BodyRenderer != null}" );
 	}
 
 	protected override void OnUpdate()
