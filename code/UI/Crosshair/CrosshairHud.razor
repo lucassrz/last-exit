@@ -1,0 +1,27 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using System;
+@inherits PanelComponent
+
+<root>
+    <div class="crosshair">
+        <div class="line line-top"></div>
+        <div class="line line-bottom"></div>
+        <div class="line line-left"></div>
+        <div class="line line-right"></div>
+        <div class="dot"></div>
+    </div>
+</root>
+
+@code
+{
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+    }
+
+    protected override int BuildHash()
+    {
+        return HashCode.Combine(Time.Now);
+    }
+}
