@@ -283,6 +283,7 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
+          "RotationSpeed": 10,
           "RunSpeed": 175,
           "WalkSpeed": 80
         },

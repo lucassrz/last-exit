@@ -9,6 +9,7 @@ public sealed class PersonnalPlayerController : Component
 {
 	[Property] public float WalkSpeed { get; set; } = 110f;
 	[Property] public float RunSpeed { get; set; } = 320f;
+	[Property] public float RotationSpeed { get; set; } = 10f;
 
 	private Rigidbody _rigidbody;
 
@@ -42,5 +43,12 @@ public sealed class PersonnalPlayerController : Component
 		// Garde la vélocité verticale (gravité) et applique le mouvement horizontal
 		var currentVelocity = _rigidbody.Velocity;
 		_rigidbody.Velocity = new Vector3( targetVelocity.x, targetVelocity.y, currentVelocity.z );
+
+		// Rotation du personnage vers la direction du mouvement
+		if ( moveDirection.Length > 0.1f )
+		{
+			var targetRotation = Rotation.LookAt( moveDirection, Vector3.Up );
+			WorldRotation = Rotation.Slerp( WorldRotation, targetRotation, Time.Delta * RotationSpeed );
+		}
 	}
 }
