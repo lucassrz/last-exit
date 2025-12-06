@@ -7,48 +7,66 @@ namespace LastExit;
 /// </summary>
 public sealed class PlayerAnimator : Component
 {
-	[Property] public SkinnedModelRenderer Renderer { get; set; }
-	[Property] public float MaxSpeed { get; set; } = 320f;
+	[Property] public SkinnedModelRenderer BodyRenderer { get; set; }
 
-	private Vector3 _previousPosition;
-	private GameObject _rootObject;
+	private PersonnalPlayerController _controller;
+	private Vector3 _lastVelocity;
+	private int _frameCount;
 
 	protected override void OnAwake()
 	{
-		// Trouve le renderer automatiquement s'il n'est pas assigné
-		if ( Renderer == null )
+		// Trouve le controller
+		_controller = Components.Get<PersonnalPlayerController>( FindMode.EnabledInSelfAndDescendants );
+		if ( _controller == null )
 		{
-			Renderer = Components.Get<SkinnedModelRenderer>( FindMode.EnabledInSelfAndDescendants );
+			_controller = Components.GetInAncestors<PersonnalPlayerController>();
 		}
 
-		// Trouve le GameObject racine (celui qui a le PersonnalPlayerController)
-		_rootObject = Components.Get<PersonnalPlayerController>()?.GameObject ?? GameObject;
-		_previousPosition = _rootObject.WorldPosition;
+		// Trouve le renderer automatiquement s'il n'est pas assigné
+		if ( BodyRenderer == null )
+		{
+			BodyRenderer = Components.Get<SkinnedModelRenderer>( FindMode.EnabledInSelfAndDescendants );
+		}
+
+		Log.Info( $"[PlayerAnimator] Controller: {_controller != null}, Renderer: {BodyRenderer != null}" );
 	}
 
 	protected override void OnUpdate()
 	{
-		if ( Renderer == null || _rootObject == null )
+		if ( BodyRenderer == null )
 			return;
 
-		UpdateAnimations();
+		UpdateAnimation();
 	}
 
-	private void UpdateAnimations()
+	private void UpdateAnimation()
 	{
-		// Calcule la vitesse en comparant la position du GameObject racine
-		var velocity = (_rootObject.WorldPosition - _previousPosition) / Time.Delta;
-		_previousPosition = _rootObject.WorldPosition;
+		// Récupère la vélocité du Rigidbody si disponible
+		var rb = _controller?.Components.Get<Rigidbody>();
+		Vector3 velocity = rb != null ? rb.Velocity : Vector3.Zero;
 
-		// Calcule la vitesse horizontale
+		// Calcule les paramètres d'animation
 		var horizontalVelocity = new Vector3( velocity.x, velocity.y, 0 );
 		float speed = horizontalVelocity.Length;
 
-		// Normalise la vitesse pour l'animator (0 = idle, 1 = vitesse max)
-		float normalizedSpeed = MaxSpeed > 0 ? speed / MaxSpeed : 0f;
+		// Paramètres pour l'AnimationGraph Citizen
+		BodyRenderer.Set( "b_grounded", true );
+		BodyRenderer.Set( "move_groundspeed", speed );
+		BodyRenderer.Set( "move_x", velocity.x );
+		BodyRenderer.Set( "move_y", velocity.y );
+		BodyRenderer.Set( "move_z", velocity.z );
+		BodyRenderer.Set( "wish_groundspeed", speed );
+		BodyRenderer.Set( "wish_x", velocity.x );
+		BodyRenderer.Set( "wish_y", velocity.y );
+		BodyRenderer.Set( "wish_z", 0f );
 
-		// Met à jour les paramètres de l'animator
-		Renderer.Set( "move_speed", normalizedSpeed );
-		Renderer.Set( "b_grounded", true );
+		// Debug toutes les 60 frames pour éviter le spam
+		_frameCount++;
+		if ( _frameCount % 60 == 0 )
+		{
+			Log.Info( $"[PlayerAnimator] Speed: {speed:F2} | Velocity: {velocity}" );
+		}
+
+		_lastVelocity = velocity;
 	}
 }

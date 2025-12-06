@@ -383,7 +383,7 @@
               "__type": "Sandbox.SkinnedModelRenderer",
               "__guid": "77f251c8-adfd-46cb-8454-853f717e0fec",
               "__enabled": true,
-              "AnimationGraph": null,
+              "AnimationGraph": "models/citizen/citizen.vanmgrph",
               "BodyGroups": 341,
               "BoneMergeTarget": null,
               "CreateAttachments": false,
