@@ -11,7 +11,6 @@ public sealed class PlayerAnimator : Component
 
 	private PersonnalPlayerController _controller;
 	private Vector3 _lastVelocity;
-	private int _frameCount;
 
 	protected override void OnAwake()
 	{
@@ -19,10 +18,7 @@ public sealed class PlayerAnimator : Component
 		_controller = Components.Get<PersonnalPlayerController>( FindMode.EnabledInSelfAndDescendants );
 
 		// Trouve le renderer automatiquement s'il n'est pas assigné
-		if ( BodyRenderer == null )
-		{
-			BodyRenderer = Components.Get<SkinnedModelRenderer>( FindMode.EnabledInSelfAndDescendants );
-		}
+		BodyRenderer = Components.Get<SkinnedModelRenderer>( FindMode.EnabledInSelfAndDescendants );
 	}
 
 	protected override void OnUpdate()

@@ -291,7 +291,12 @@
           "__type": "LastExit.PlayerAnimator",
           "__guid": "288fd835-5288-4390-96bc-4d67edf27223",
           "__enabled": true,
-          "BodyRenderer": null,
+          "BodyRenderer": {
+            "_type": "component",
+            "component_id": "77f251c8-adfd-46cb-8454-853f717e0fec",
+            "go": "68f4fa52-a7e7-46fa-b589-76ac3571f52e",
+            "component_type": "SkinnedModelRenderer"
+          },
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
