@@ -55,7 +55,7 @@
             "CreateAttachments": false,
             "LodOverride": null,
             "MaterialGroup": null,
-            "MaterialOverride": null,
+            "MaterialOverride": "materials/terrain/grass/terrain_grass.vmat",
             "Materials": null,
             "Model": "models/dev/plane.vmdl",
             "OnComponentDestroy": null,
@@ -71,7 +71,7 @@
               "AfterUILayer": false
             },
             "RenderType": "On",
-            "Tint": "0,1,0.13333,1"
+            "Tint": "1,1,1,1"
           },
           {
             "__type": "Sandbox.PlaneCollider",
@@ -250,7 +250,8 @@
   "MenuIcon": null,
   "DontBreakAsTemplate": false,
   "__references": [
-    "gtavteam.gta5proptreecedars01#103429"
+    "gtavteam.gta5proptreecedars01#103429",
+    "rustextended.terrain_grass#43376"
   ],
   "__version": 2
 }

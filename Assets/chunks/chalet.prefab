@@ -55,7 +55,7 @@
             "CreateAttachments": false,
             "LodOverride": null,
             "MaterialGroup": null,
-            "MaterialOverride": null,
+            "MaterialOverride": "materials/wood/floor/wooden_flooring_b2.vmat",
             "Materials": null,
             "Model": "models/dev/plane.vmdl",
             "OnComponentDestroy": null,
@@ -71,7 +71,7 @@
               "AfterUILayer": false
             },
             "RenderType": "On",
-            "Tint": "0.37209,0.27907,0,1"
+            "Tint": "1,1,1,1"
           },
           {
             "__type": "Sandbox.PlaneCollider",
@@ -250,7 +250,8 @@
   "MenuIcon": null,
   "DontBreakAsTemplate": false,
   "__references": [
-    "facepunch.couch#33708"
+    "facepunch.couch#33708",
+    "facepunch.woodenflooringblight#111150"
   ],
   "__version": 2
 }
