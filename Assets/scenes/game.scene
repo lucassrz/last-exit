@@ -88,7 +88,7 @@
         {
           "__type": "Sandbox.ModelRenderer",
           "__guid": "caf2c1e8-658e-4fcc-a920-ae0e48751d27",
-          "__enabled": true,
+          "__enabled": false,
           "BodyGroups": 18446744073709551615,
           "CreateAttachments": false,
           "LodOverride": null,
@@ -114,7 +114,7 @@
         {
           "__type": "Sandbox.PlaneCollider",
           "__guid": "b43a6af7-abdc-44fd-bae3-1ce7e3cab396",
-          "__enabled": true,
+          "__enabled": false,
           "Center": "0,0,0",
           "ColliderFlags": 0,
           "Elasticity": null,
@@ -316,7 +316,7 @@
           "Flags": 0,
           "Name": "Body",
           "Position": "0,0,0",
-          "Rotation": "0,0,0,1",
+          "Rotation": "0,-0,0,1",
           "Scale": "1,1,1",
           "Tags": "",
           "Enabled": true,
@@ -451,6 +451,57 @@
           "OnComponentUpdate": null,
           "PointColor": "0.11667,0,1,1",
           "PointSize": 2
+        }
+      ],
+      "Children": []
+    },
+    {
+      "__guid": "311469b0-9cae-460d-8157-16b794b7e0be",
+      "__version": 1,
+      "Flags": 0,
+      "Name": "Chunks",
+      "Position": "-293.004,136.097,191.5252",
+      "Rotation": "0,0,0,1",
+      "Scale": "1,1,1",
+      "Tags": "",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "NetworkInterpolation": true,
+      "NetworkOrphaned": 0,
+      "NetworkTransmit": true,
+      "OwnerTransfer": 1,
+      "Components": [
+        {
+          "__type": "ChunkManager",
+          "__guid": "294ccce8-17a6-4d19-a32d-00c15c5579f7",
+          "__enabled": true,
+          "ChunkPrefabs": [
+            {
+              "_type": "gameobject",
+              "prefab": "chunks/chalet.prefab"
+            },
+            {
+              "_type": "gameobject",
+              "prefab": "chunks/foret.prefab"
+            },
+            {
+              "_type": "gameobject",
+              "prefab": "chunks/ville.prefab"
+            }
+          ],
+          "ChunkSize": 700,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null,
+          "Player": {
+            "_type": "gameobject",
+            "go": "79366534-d1b4-40db-a7ed-438278275fa4"
+          },
+          "RenderDistance": 2,
+          "Seed": 30
         }
       ],
       "Children": []
