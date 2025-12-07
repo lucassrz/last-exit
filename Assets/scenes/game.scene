@@ -76,7 +76,7 @@
       "Name": "Plane",
       "Position": "0,0,0",
       "Rotation": "0,0,0,1",
-      "Scale": "5.877315,7.159213,1",
+      "Scale": "7,7,1",
       "Tags": "",
       "Enabled": true,
       "NetworkMode": 2,

@@ -16,7 +16,8 @@ public sealed class CrosshairManager : Component
 			Camera = Scene.GetAllComponents<CameraComponent>().FirstOrDefault();
 		}
 
-		Mouse.Visibility = MouseVisibility.Visible;
+		// Cache le curseur Windows pour n'utiliser que le crosshair 3D
+		Mouse.Visibility = MouseVisibility.Hidden;
 	}
 
 	protected override void OnUpdate()
