@@ -12,10 +12,14 @@ public sealed class PersonnalPlayerController : Component
 	[Property] public float RotationSpeed { get; set; } = 10f;
 
 	private Rigidbody _rigidbody;
+	private Vector2 _lastMousePosition;
+	private float _timeSinceMouseMoved = 0f;
+	private const float MOUSE_IDLE_THRESHOLD = 0.5f; // Temps en secondes avant de considérer la souris inactive
 
 	protected override void OnAwake()
 	{
 		_rigidbody = Components.Get<Rigidbody>();
+		_lastMousePosition = Mouse.Position;
 	}
 
 	protected override void OnUpdate()
@@ -34,11 +38,23 @@ public sealed class PersonnalPlayerController : Component
 		// Calcule la direction de mouvement (horizontal seulement)
 		var moveDirection = new Vector3( input.x, input.y, 0 ).Normal;
 
+		// Détecte si la souris a bougé
+		var currentMousePosition = Mouse.Position;
+		if ( Vector2.Distance( _lastMousePosition, currentMousePosition ) > 0.001f )
+		{
+			_timeSinceMouseMoved = 0f;
+			_lastMousePosition = currentMousePosition;
+		}
+		else
+		{
+			_timeSinceMouseMoved += Time.Delta;
+		}
+
 		// Calcule le multiplicateur de vitesse basé sur la direction
 		float speedMultiplier = GetSpeedMultiplier( moveDirection );
 
-		// Détermine la vitesse de base
-		var baseSpeed = Input.Down( "run" ) ? RunSpeed : WalkSpeed;
+		// Détermine la vitesse de base (court par défaut, marche si la touche "walk" est enfoncée)
+		var baseSpeed = Input.Down( "walk" ) ? WalkSpeed : RunSpeed;
 
 		// Applique le multiplicateur
 		var speed = baseSpeed * speedMultiplier;
@@ -50,11 +66,26 @@ public sealed class PersonnalPlayerController : Component
 		var currentVelocity = _rigidbody.Velocity;
 		_rigidbody.Velocity = new Vector3( targetVelocity.x, targetVelocity.y, currentVelocity.z );
 
-		// Rotation du personnage vers la position du crosshair
-		var directionToCrosshair = CrosshairManager.GetHorizontalDirectionFrom( WorldPosition );
-		if ( directionToCrosshair.Length > 0.1f )
+		// Rotation du personnage
+		HandleRotation( moveDirection );
+	}
+
+	private void HandleRotation( Vector3 moveDirection )
+	{
+		// Si la souris a bougé récemment, utilise le crosshair pour la rotation
+		if ( _timeSinceMouseMoved < MOUSE_IDLE_THRESHOLD )
 		{
-			var targetRotation = Rotation.LookAt( directionToCrosshair, Vector3.Up );
+			var directionToCrosshair = CrosshairManager.GetHorizontalDirectionFrom( WorldPosition );
+			if ( directionToCrosshair.Length > 0.1f )
+			{
+				var targetRotation = Rotation.LookAt( directionToCrosshair, Vector3.Up );
+				WorldRotation = Rotation.Slerp( WorldRotation, targetRotation, Time.Delta * RotationSpeed );
+			}
+		}
+		// Sinon, utilise la direction des inputs WASD
+		else if ( moveDirection.Length > 0.1f )
+		{
+			var targetRotation = Rotation.LookAt( moveDirection, Vector3.Up );
 			WorldRotation = Rotation.Slerp( WorldRotation, targetRotation, Time.Delta * RotationSpeed );
 		}
 	}
