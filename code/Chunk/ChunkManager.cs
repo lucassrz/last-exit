@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public sealed class ChunkManager : Component
 {
-	// chunks size 700x700
 	[Property] public int ChunkSize { get; set; } = 700;
 	[Property] public GameObject Player { get; set; }
 	[Property] public int Seed { get; set; } = 1234;
@@ -25,10 +24,10 @@ public sealed class ChunkManager : Component
 
 		var playerPos = Player.WorldPosition;
 
-		int chunkX = (int)(playerPos.x / ChunkSize);
-		int chunkY = (int)(playerPos.y / ChunkSize);
+		int chunkX = (int)Math.Floor((playerPos.x + ChunkSize / 2f) / ChunkSize);
+		int chunkY = (int)Math.Floor((playerPos.y + ChunkSize / 2f) / ChunkSize);
 
-		Log.Info($"Chunk actuel - X: {chunkX}, Y: {chunkY}");
+		Log.Info($"Chunk actuel - X: {chunkX}, Y: {chunkY} | Position: ({playerPos.x:F1}, {playerPos.y:F1})");
 
 		// Charger et décharger les chunks autour du joueur
 		UpdateChunks(chunkX, chunkY);
