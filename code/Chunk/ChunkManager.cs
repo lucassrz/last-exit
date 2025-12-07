@@ -11,6 +11,8 @@ public sealed class ChunkManager : Component
 	[Property] public int RenderDistance { get; set; } = 2;
 
 	private Dictionary<Vector2Int, GameObject> loadedChunks = new Dictionary<Vector2Int, GameObject>();
+	// Stocke pour chaque position de chunk, quelle est sa position master (coin supérieur gauche du multi-chunk)
+	private Dictionary<Vector2Int, Vector2Int> chunkToMaster = new Dictionary<Vector2Int, Vector2Int>();
 
 	protected override void OnUpdate()
     {
@@ -71,17 +73,75 @@ public sealed class ChunkManager : Component
 			{
 				Vector2Int chunkCoord = new Vector2Int(x, y);
 
-				// Vérifier si le chunk est déjà chargé
-				if ( !loadedChunks.ContainsKey(chunkCoord) )
+				// Trouver la position master de ce chunk
+				Vector2Int masterPos = GetMasterChunkPosition(chunkCoord);
+
+				// Vérifier si le chunk master est déjà chargé
+				if ( !loadedChunks.ContainsKey(masterPos) )
 				{
-					// Charger le chunk
-					LoadChunk(chunkCoord);
+					// Charger le chunk master
+					LoadChunk(masterPos);
 				}
 			}
 		}
 
 		// Décharger les chunks trop éloignés
 		UnloadDistantChunks(playerChunkX, playerChunkY);
+	}
+
+	// Détermine la position master (coin supérieur gauche) du chunk qui occupe cette position
+	private Vector2Int GetMasterChunkPosition(Vector2Int chunkCoord)
+	{
+		// Si déjà dans le cache, retourner directement
+		if ( chunkToMaster.TryGetValue(chunkCoord, out Vector2Int cachedMaster) )
+		{
+			return cachedMaster;
+		}
+
+		// Déterminer quelle structure devrait être à cette position
+		// On teste TOUTES les positions qui pourraient être le master (pour un chunk 2x2 max)
+		// On commence par les offsets les plus éloignés pour donner priorité aux grands chunks
+		Vector2Int? foundMaster = null;
+		int maxSize = 0;
+
+		for ( int offsetX = -1; offsetX <= 0; offsetX++ )
+		{
+			for ( int offsetY = -1; offsetY <= 0; offsetY++ )
+			{
+				Vector2Int testMasterPos = new Vector2Int(chunkCoord.x + offsetX, chunkCoord.y + offsetY);
+				int chunkTypeIndex = GetChunkType(testMasterPos.x, testMasterPos.y);
+
+				if ( chunkTypeIndex < 0 || chunkTypeIndex >= ChunkPrefabs.Length )
+					continue;
+
+				var chunkComp = ChunkPrefabs[chunkTypeIndex].GetComponent<Chunk>();
+				if ( chunkComp == null )
+					continue;
+
+				// Vérifier si cette position master contient notre chunk cible
+				int endX = testMasterPos.x + chunkComp.GridWidth;
+				int endY = testMasterPos.y + chunkComp.GridHeight;
+
+				if ( chunkCoord.x >= testMasterPos.x && chunkCoord.x < endX &&
+					 chunkCoord.y >= testMasterPos.y && chunkCoord.y < endY )
+				{
+					// Calculer la taille totale de ce chunk
+					int size = chunkComp.GridWidth * chunkComp.GridHeight;
+
+					// Donner priorité au chunk le plus grand
+					if ( size > maxSize )
+					{
+						maxSize = size;
+						foundMaster = testMasterPos;
+					}
+				}
+			}
+		}
+
+		// Utiliser le master trouvé ou la position elle-même par défaut
+		Vector2Int finalMaster = foundMaster ?? chunkCoord;
+		chunkToMaster[chunkCoord] = finalMaster;
+		return finalMaster;
 	}
 
 	private void LoadChunk(Vector2Int chunkCoord)
@@ -91,40 +151,84 @@ public sealed class ChunkManager : Component
 
 		// Obtenir le type de chunk basé sur les coordonnées
 		int chunkTypeIndex = GetChunkType(chunkCoord.x, chunkCoord.y);
+		GameObject chunkPrefab = ChunkPrefabs[chunkTypeIndex];
+
+		// Obtenir les dimensions du chunk
+		var chunkComp = chunkPrefab.GetComponent<Chunk>();
+		if ( chunkComp == null )
+			return;
+
+		int gridWidth = chunkComp.GridWidth;
+		int gridHeight = chunkComp.GridHeight;
 
 		// Placer le chunk dans le monde
-		GameObject chunkObj = PlaceChunk(ChunkPrefabs[chunkTypeIndex], chunkCoord);
+		GameObject chunkObj = PlaceChunk(chunkPrefab, chunkCoord);
 
-		// Ajouter le chunk au dictionnaire
-		loadedChunks[chunkCoord] = chunkObj;
+		// Marquer toutes les positions occupées par ce chunk multi-grille
+		for ( int x = 0; x < gridWidth; x++ )
+		{
+			for ( int y = 0; y < gridHeight; y++ )
+			{
+				Vector2Int occupiedPos = new Vector2Int(chunkCoord.x + x, chunkCoord.y + y);
+
+				// Toutes les positions pointent vers le même GameObject master
+				loadedChunks[occupiedPos] = chunkObj;
+
+				// Toutes les positions pointent vers la position master
+				chunkToMaster[occupiedPos] = chunkCoord;
+			}
+		}
+
+		Log.Info($"Chunk chargé - Type: {chunkTypeIndex}, Position master: ({chunkCoord.x}, {chunkCoord.y}), Taille: {gridWidth}x{gridHeight}");
 	}
 
 	private void UnloadDistantChunks(int playerChunkX, int playerChunkY)
 	{
-		List<Vector2Int> chunksToUnload = new List<Vector2Int>();
+		HashSet<Vector2Int> masterChunksToUnload = new HashSet<Vector2Int>();
 
-		// Identifier les chunks trop éloignés
+		// Identifier les chunks master trop éloignés
 		foreach ( var kvp in loadedChunks )
 		{
 			Vector2Int chunkCoord = kvp.Key;
-			int distanceX = Math.Abs(chunkCoord.x - playerChunkX);
-			int distanceY = Math.Abs(chunkCoord.y - playerChunkY);
 
-			// Si le chunk est en dehors de la distance de rendu, le marquer pour déchargement
+			// Obtenir la position master de ce chunk
+			if ( !chunkToMaster.TryGetValue(chunkCoord, out Vector2Int masterPos) )
+				continue;
+
+			// Vérifier la distance depuis la position master
+			int distanceX = Math.Abs(masterPos.x - playerChunkX);
+			int distanceY = Math.Abs(masterPos.y - playerChunkY);
+
+			// Si le chunk master est en dehors de la distance de rendu, le marquer
 			if ( distanceX > RenderDistance || distanceY > RenderDistance )
 			{
-				chunksToUnload.Add(chunkCoord);
+				masterChunksToUnload.Add(masterPos);
 			}
 		}
 
-		// Décharger les chunks marqués
-		foreach ( var chunkCoord in chunksToUnload )
+		// Décharger les chunks master marqués
+		foreach ( var masterPos in masterChunksToUnload )
 		{
-			if ( loadedChunks.TryGetValue(chunkCoord, out GameObject chunkObj) )
+			if ( !loadedChunks.TryGetValue(masterPos, out GameObject chunkObj) )
+				continue;
+
+			// Obtenir les dimensions du chunk pour nettoyer toutes les positions occupées
+			var chunkComp = chunkObj.GetComponent<Chunk>();
+			if ( chunkComp != null )
 			{
-				chunkObj.Destroy();
-				loadedChunks.Remove(chunkCoord);
+				for ( int x = 0; x < chunkComp.GridWidth; x++ )
+				{
+					for ( int y = 0; y < chunkComp.GridHeight; y++ )
+					{
+						Vector2Int occupiedPos = new Vector2Int(masterPos.x + x, masterPos.y + y);
+						loadedChunks.Remove(occupiedPos);
+						chunkToMaster.Remove(occupiedPos);
+					}
+				}
 			}
+
+			// Détruire l'objet
+			chunkObj.Destroy();
 		}
 	}
 
