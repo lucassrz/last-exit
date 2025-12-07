@@ -1,0 +1,20 @@
+{
+  "BiomeName": "Forest",
+  "MinNoiseValue": 0,
+  "MaxNoiseValue": 0.5,
+  "GroundPrefab": {
+    "_type": "gameobject",
+    "prefab": "prefab/ground/forests.prefab"
+  },
+  "SpawnablePrefabs": [
+    {
+      "_type": "gameobject",
+      "prefab": "prefab/tree/tree_1.prefab"
+    }
+  ],
+  "ObjectDensity": 0.25,
+  "MaxObjectsPerChunk": 4,
+  "ObjectNoiseScale": 0.5,
+  "__references": [],
+  "__version": 0
+}

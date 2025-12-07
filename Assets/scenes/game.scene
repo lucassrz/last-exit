@@ -476,41 +476,22 @@
           "__guid": "294ccce8-17a6-4d19-a32d-00c15c5579f7",
           "__enabled": true,
           "BiomeNoiseScale": 0.1,
-          "BiomeThreshold": 0.5,
+          "Biomes": [
+            "biomes/forest.biome"
+          ],
           "ChunkSize": 250,
-          "ForestPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefab/forests.prefab"
-          },
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "PlainsPrefab": {
-            "_type": "gameobject",
-            "prefab": "prefab/plains.prefab"
-          },
           "Player": {
             "_type": "gameobject",
             "go": "79366534-d1b4-40db-a7ed-438278275fa4"
           },
-          "RenderDistance": 4,
-          "Seed": 32,
-          "TreeDensity": 0.2,
-          "TreeNoiseScale": 0.3,
-          "TreePrefabs": [
-            {
-              "_type": "gameobject",
-              "prefab": "prefab/tree_1.prefab"
-            },
-            {
-              "_type": "gameobject",
-              "prefab": "prefab/abandonned_car_1.prefab"
-            }
-          ],
-          "TreesPerChunk": 8
+          "RenderDistance": 3,
+          "Seed": 32
         }
       ],
       "Children": []
