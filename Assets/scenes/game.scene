@@ -206,58 +206,6 @@
       "Children": []
     },
     {
-      "__guid": "150321f9-d10f-46ee-be8b-b32e3f03b95e",
-      "__version": 1,
-      "Flags": 0,
-      "Name": "Crosshair",
-      "Position": "-679.1481,-199.2442,363.1634",
-      "Rotation": "0,0,0,1",
-      "Scale": "1,1,1",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 2,
-      "NetworkInterpolation": true,
-      "NetworkOrphaned": 0,
-      "NetworkTransmit": true,
-      "OwnerTransfer": 1,
-      "Components": [
-        {
-          "__type": "Sandbox.ScreenPanel",
-          "__guid": "871474b7-60b9-4900-b9fe-98e6bc5a7f20",
-          "__enabled": true,
-          "AutoScreenScale": true,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "Opacity": 1,
-          "Scale": 1,
-          "ScaleStrategy": "ConsistentHeight",
-          "TargetCamera": {
-            "_type": "component",
-            "component_id": "7c4209b8-4dad-4c03-8742-05ba39c464e9",
-            "go": "ca28b51d-a265-4944-b0a8-ba2a214f5b7e",
-            "component_type": "CameraComponent"
-          },
-          "ZIndex": 100
-        },
-        {
-          "__type": "Sandbox.UI.Crosshair.CrosshairHud",
-          "__guid": "8a2873a2-324a-4217-a35d-562bedd800d0",
-          "__enabled": true,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null
-        }
-      ],
-      "Children": []
-    },
-    {
       "__guid": "79366534-d1b4-40db-a7ed-438278275fa4",
       "__version": 1,
       "Flags": 0,
@@ -447,10 +395,95 @@
           "__type": "LastExit.GameManager",
           "__guid": "54789e87-0acf-4134-a2a1-fc2b910b2922",
           "__enabled": true,
-          "CrosshairPrefab": {
-            "_type": "gameobject",
-            "go": "150321f9-d10f-46ee-be8b-b32e3f03b95e"
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
+        }
+      ],
+      "Children": []
+    },
+    {
+      "__guid": "14808a40-01d6-436d-a49c-e539f30a9e42",
+      "__version": 1,
+      "Flags": 0,
+      "Name": "Crosshair Manager",
+      "Position": "-163.7182,45.97705,115.2835",
+      "Rotation": "0,0,0,1",
+      "Scale": "1,1,1",
+      "Tags": "",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "NetworkInterpolation": true,
+      "NetworkOrphaned": 0,
+      "NetworkTransmit": true,
+      "OwnerTransfer": 1,
+      "Components": [
+        {
+          "__type": "LastExit.CrosshairManager",
+          "__guid": "31c40e77-17e4-4ca8-a8ec-d3a13c4d0e9f",
+          "__enabled": true,
+          "Camera": {
+            "_type": "component",
+            "component_id": "7c4209b8-4dad-4c03-8742-05ba39c464e9",
+            "go": "ca28b51d-a265-4944-b0a8-ba2a214f5b7e",
+            "component_type": "CameraComponent"
           },
+          "MaxDistance": 10000,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null
+        }
+      ],
+      "Children": []
+    },
+    {
+      "__guid": "850d17e3-a894-4272-a1cd-82d7234f2ed4",
+      "__version": 1,
+      "Flags": 0,
+      "Name": "Crosshair",
+      "Position": "43.88341,-8.482254,-25.70224",
+      "Rotation": "0,0,0,1",
+      "Scale": "1,1,1",
+      "Tags": "",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "NetworkInterpolation": true,
+      "NetworkOrphaned": 0,
+      "NetworkTransmit": true,
+      "OwnerTransfer": 1,
+      "Components": [
+        {
+          "__type": "Sandbox.ScreenPanel",
+          "__guid": "0c0778a1-731e-4e87-9cee-fc4301e78f72",
+          "__enabled": true,
+          "AutoScreenScale": true,
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null,
+          "Opacity": 1,
+          "Scale": 1,
+          "ScaleStrategy": "ConsistentHeight",
+          "TargetCamera": {
+            "_type": "component",
+            "component_id": "7c4209b8-4dad-4c03-8742-05ba39c464e9",
+            "go": "ca28b51d-a265-4944-b0a8-ba2a214f5b7e",
+            "component_type": "CameraComponent"
+          },
+          "ZIndex": 100
+        },
+        {
+          "__type": "Sandbox.UI.Crosshair.CrosshairHud",
+          "__guid": "e9099388-3677-44ed-a8f2-0be958e00641",
+          "__enabled": true,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,

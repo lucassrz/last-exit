@@ -3,8 +3,8 @@
 @using System;
 @inherits PanelComponent
 
-<root>
-    <div class="crosshair">
+<root style="pointer-events: all;">
+    <div class="crosshair" style="left: @(MouseX)px; top: @(MouseY)px;">
         <div class="line line-top"></div>
         <div class="line line-bottom"></div>
         <div class="line line-left"></div>
@@ -15,13 +15,21 @@
 
 @code
 {
+    private float MouseX { get; set; }
+    private float MouseY { get; set; }
+
     protected override void OnUpdate()
     {
         base.OnUpdate();
+
+        // Utilise Mouse.Position directement sans scaling
+        var mousePos = Mouse.Position;
+        MouseX = mousePos.x;
+        MouseY = mousePos.y;
     }
 
     protected override int BuildHash()
     {
-        return HashCode.Combine(Time.Now);
+        return HashCode.Combine(MouseX, MouseY);
     }
 }
