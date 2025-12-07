@@ -52,7 +52,7 @@ public sealed class CrosshairManager : Component
 	public static Vector3 GetHorizontalDirectionFrom( Vector3 position )
 	{
 		var direction = TargetPosition - position;
-		direction.z = 0; // Ignore la hauteur
+		direction.z = 0;
 		return direction.Normal;
 	}
 }
