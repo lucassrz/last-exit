@@ -1,6 +1,7 @@
 @using Sandbox;
 @using Sandbox.UI;
 @using System;
+@namespace LastExit.UI
 @inherits PanelComponent
 
 <root style="pointer-events: all;">
@@ -22,10 +23,19 @@
     {
         base.OnUpdate();
 
-        // Utilise Mouse.Position directement sans scaling
-        var mousePos = Mouse.Position;
-        MouseX = mousePos.x;
-        MouseY = mousePos.y;
+        // Récupère la caméra principale
+        var camera = Scene.GetAllComponents<CameraComponent>().FirstOrDefault();
+
+        if (camera != null)
+        {
+            // Convertit la position 3D du crosshair en coordonnées écran 2D
+            var screenPos = camera.PointToScreenPixels(LastExit.CrosshairManager.TargetPosition);
+            MouseX = screenPos.x;
+            MouseY = screenPos.y;
+        }
+
+        // Debug : affiche la position dans la console
+        // Log.Info( $"Crosshair: {MouseX}, {MouseY} | Screen: {Screen.Size}" );
     }
 
     protected override int BuildHash()

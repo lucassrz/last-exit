@@ -438,58 +438,19 @@
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null
-        }
-      ],
-      "Children": []
-    },
-    {
-      "__guid": "850d17e3-a894-4272-a1cd-82d7234f2ed4",
-      "__version": 1,
-      "Flags": 0,
-      "Name": "Crosshair",
-      "Position": "43.88341,-8.482254,-25.70224",
-      "Rotation": "0,0,0,1",
-      "Scale": "1,1,1",
-      "Tags": "",
-      "Enabled": true,
-      "NetworkMode": 2,
-      "NetworkInterpolation": true,
-      "NetworkOrphaned": 0,
-      "NetworkTransmit": true,
-      "OwnerTransfer": 1,
-      "Components": [
+        },
         {
-          "__type": "Sandbox.ScreenPanel",
-          "__guid": "0c0778a1-731e-4e87-9cee-fc4301e78f72",
+          "__type": "LastExit.CrosshairRenderer",
+          "__guid": "619448f4-8c9f-426e-af60-17e789244492",
           "__enabled": true,
-          "AutoScreenScale": true,
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
-          "Opacity": 1,
-          "Scale": 1,
-          "ScaleStrategy": "ConsistentHeight",
-          "TargetCamera": {
-            "_type": "component",
-            "component_id": "7c4209b8-4dad-4c03-8742-05ba39c464e9",
-            "go": "ca28b51d-a265-4944-b0a8-ba2a214f5b7e",
-            "component_type": "CameraComponent"
-          },
-          "ZIndex": 100
-        },
-        {
-          "__type": "Sandbox.UI.Crosshair.CrosshairHud",
-          "__guid": "e9099388-3677-44ed-a8f2-0be958e00641",
-          "__enabled": true,
-          "OnComponentDestroy": null,
-          "OnComponentDisabled": null,
-          "OnComponentEnabled": null,
-          "OnComponentFixedUpdate": null,
-          "OnComponentStart": null,
-          "OnComponentUpdate": null
+          "PointColor": "0.11667,0,1,1",
+          "PointSize": 2
         }
       ],
       "Children": []

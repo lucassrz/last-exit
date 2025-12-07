@@ -35,8 +35,8 @@ public sealed class CrosshairManager : Component
 			Camera = Scene.GetAllComponents<CameraComponent>().FirstOrDefault();
 		}
 
-		// Cache le curseur Windows
-		Mouse.Visibility = MouseVisibility.Hidden;
+		// Garde le curseur Windows visible (optionnel : peut être caché si vous préférez)
+		Mouse.Visibility = MouseVisibility.Visible;
 	}
 
 	protected override void OnUpdate()
@@ -49,7 +49,7 @@ public sealed class CrosshairManager : Component
 		if ( Camera == null )
 			return;
 
-		// Utilise la position de la souris pour le crosshair
+		// Utilise la position de la souris directement
 		var mousePos = Mouse.Position;
 
 		// Crée un rayon depuis la caméra vers la position de la souris
