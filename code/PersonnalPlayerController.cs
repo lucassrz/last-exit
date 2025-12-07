@@ -44,10 +44,11 @@ public sealed class PersonnalPlayerController : Component
 		var currentVelocity = _rigidbody.Velocity;
 		_rigidbody.Velocity = new Vector3( targetVelocity.x, targetVelocity.y, currentVelocity.z );
 
-		// Rotation du personnage vers la direction du mouvement
-		if ( moveDirection.Length > 0.1f )
+		// Rotation du personnage vers la position du crosshair
+		var directionToCrosshair = CrosshairManager.GetHorizontalDirectionFrom( WorldPosition );
+		if ( directionToCrosshair.Length > 0.1f )
 		{
-			var targetRotation = Rotation.LookAt( moveDirection, Vector3.Up );
+			var targetRotation = Rotation.LookAt( directionToCrosshair, Vector3.Up );
 			WorldRotation = Rotation.Slerp( WorldRotation, targetRotation, Time.Delta * RotationSpeed );
 		}
 	}
