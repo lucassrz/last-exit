@@ -232,7 +232,7 @@
           "OnComponentStart": null,
           "OnComponentUpdate": null,
           "RotationSpeed": 10,
-          "RunSpeed": 175,
+          "RunSpeed": 300,
           "WalkSpeed": 80
         },
         {
@@ -316,7 +316,7 @@
           "Flags": 0,
           "Name": "Body",
           "Position": "0,0,0",
-          "Rotation": "0,-0,0,1",
+          "Rotation": "0,0,0,1",
           "Scale": "1,1,1",
           "Tags": "",
           "Enabled": true,
@@ -475,33 +475,42 @@
           "__type": "ChunkManager",
           "__guid": "294ccce8-17a6-4d19-a32d-00c15c5579f7",
           "__enabled": true,
-          "ChunkPrefabs": [
-            {
-              "_type": "gameobject",
-              "prefab": "chunks/chalet.prefab"
-            },
-            {
-              "_type": "gameobject",
-              "prefab": "chunks/foret.prefab"
-            },
-            {
-              "_type": "gameobject",
-              "prefab": "chunks/ville.prefab"
-            }
-          ],
-          "ChunkSize": 700,
+          "BiomeNoiseScale": 0.1,
+          "BiomeThreshold": 0.5,
+          "ChunkSize": 250,
+          "ForestPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefab/forests.prefab"
+          },
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
           "OnComponentUpdate": null,
+          "PlainsPrefab": {
+            "_type": "gameobject",
+            "prefab": "prefab/plains.prefab"
+          },
           "Player": {
             "_type": "gameobject",
             "go": "79366534-d1b4-40db-a7ed-438278275fa4"
           },
-          "RenderDistance": 2,
-          "Seed": 30
+          "RenderDistance": 4,
+          "Seed": 32,
+          "TreeDensity": 0.2,
+          "TreeNoiseScale": 0.3,
+          "TreePrefabs": [
+            {
+              "_type": "gameobject",
+              "prefab": "prefab/tree_1.prefab"
+            },
+            {
+              "_type": "gameobject",
+              "prefab": "prefab/abandonned_car_1.prefab"
+            }
+          ],
+          "TreesPerChunk": 8
         }
       ],
       "Children": []

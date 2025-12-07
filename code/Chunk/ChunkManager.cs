@@ -4,20 +4,29 @@ using System.Collections.Generic;
 
 public sealed class ChunkManager : Component
 {
-	[Property] public int ChunkSize { get; set; } = 700;
+	[Property] public int ChunkSize { get; set; } = 200;
 	[Property] public GameObject Player { get; set; }
 	[Property] public int Seed { get; set; } = 1234;
-	[Property] public GameObject[] ChunkPrefabs { get; set; }
 	[Property] public int RenderDistance { get; set; } = 2;
 
+	// Prefabs pour les différents biomes
+	[Property] public GameObject ForestPrefab { get; set; }
+	[Property] public GameObject[] TreePrefabs { get; set; }
+	[Property] public GameObject PlainsPrefab { get; set; }
+
+	// Paramètres du Perlin Noise
+	[Property] public float BiomeNoiseScale { get; set; } = 0.1f; // Échelle du bruit pour les biomes (plus grand = biomes plus petits)
+	[Property] public float BiomeThreshold { get; set; } = 0.7f; // Seuil forêt/plaines
+	[Property] public float TreeNoiseScale { get; set; } = 0.3f; // Échelle pour placement d'arbres
+	[Property] public float TreeDensity { get; set; } = 0.5f; // Densité des arbres (0-1)
+	[Property] public int TreesPerChunk { get; set; } = 8; // Nombre max d'arbres par chunk
+
 	private Dictionary<Vector2Int, GameObject> loadedChunks = new Dictionary<Vector2Int, GameObject>();
-	// Stocke pour chaque position de chunk, quelle est sa position master (coin supérieur gauche du multi-chunk)
-	private Dictionary<Vector2Int, Vector2Int> chunkToMaster = new Dictionary<Vector2Int, Vector2Int>();
 
 	protected override void OnUpdate()
-    {
+	{
 		CheckChunks();
-    }
+	}
 
 	public void CheckChunks()
 	{
@@ -29,39 +38,8 @@ public sealed class ChunkManager : Component
 		int chunkX = (int)Math.Floor((playerPos.x + ChunkSize / 2f) / ChunkSize);
 		int chunkY = (int)Math.Floor((playerPos.y + ChunkSize / 2f) / ChunkSize);
 
-		Log.Info($"Chunk actuel - X: {chunkX}, Y: {chunkY} | Position: ({playerPos.x:F1}, {playerPos.y:F1})");
-
 		// Charger et décharger les chunks autour du joueur
 		UpdateChunks(chunkX, chunkY);
-	}
-
-	public int GetChunkType(int chunkX, int chunkY)
-	{
-		string sousSeed = $"{Seed}_{chunkX}_{chunkY}";
-		int hashSousSeed = sousSeed.GetHashCode();
-
-		int totalWeight = 0;
-		for ( int i = 0; i < ChunkPrefabs.Length; i++ )
-		{
-			var chunkComp = ChunkPrefabs[i].GetComponent<Chunk>();
-			totalWeight += chunkComp.Weight;
-		}
-
-		int r =  new Random(hashSousSeed).Next( 0, totalWeight );
-
-		var chunkType = 0;
-		for ( int i = 0; i < ChunkPrefabs.Length; i++ )
-		{
-			var chunkComp = ChunkPrefabs[i].GetComponent<Chunk>();
-			r -= chunkComp.Weight;
-			if ( r <= 0 )
-			{
-				chunkType = i;
-				break;
-			}
-		}
-
-		return chunkType;
 	}
 
 	public void UpdateChunks(int playerChunkX, int playerChunkY)
@@ -73,14 +51,9 @@ public sealed class ChunkManager : Component
 			{
 				Vector2Int chunkCoord = new Vector2Int(x, y);
 
-				// Trouver la position master de ce chunk
-				Vector2Int masterPos = GetMasterChunkPosition(chunkCoord);
-
-				// Vérifier si le chunk master est déjà chargé
-				if ( !loadedChunks.ContainsKey(masterPos) )
+				if ( !loadedChunks.ContainsKey(chunkCoord) )
 				{
-					// Charger le chunk master
-					LoadChunk(masterPos);
+					LoadChunk(chunkCoord);
 				}
 			}
 		}
@@ -89,146 +62,183 @@ public sealed class ChunkManager : Component
 		UnloadDistantChunks(playerChunkX, playerChunkY);
 	}
 
-	// Détermine la position master (coin supérieur gauche) du chunk qui occupe cette position
-	private Vector2Int GetMasterChunkPosition(Vector2Int chunkCoord)
+	// Génère une valeur de Perlin-like Noise pour une position donnée (entre 0 et 1)
+	private float GetPerlinNoise(int x, int y, float scale, int seedOffset = 0)
 	{
-		// Si déjà dans le cache, retourner directement
-		if ( chunkToMaster.TryGetValue(chunkCoord, out Vector2Int cachedMaster) )
+		float sampleX = (x + seedOffset) * scale;
+		float sampleY = (y + seedOffset) * scale;
+
+		// Utiliser une fonction de hash déterministe basée sur la seed
+		return SimplexNoise(sampleX + Seed, sampleY + Seed);
+	}
+
+	// Fonction de bruit simplifié (retourne une valeur entre 0 et 1)
+	private float SimplexNoise(float x, float y)
+	{
+		// Interpolation pour rendre le bruit plus smooth
+		float ix = MathF.Floor(x);
+		float iy = MathF.Floor(y);
+		float fx = x - ix;
+		float fy = y - iy;
+
+		// Smooth interpolation (fonction smoothstep)
+		float sx = fx * fx * (3.0f - 2.0f * fx);
+		float sy = fy * fy * (3.0f - 2.0f * fy);
+
+		// Générer du bruit aux 4 coins
+		float n00 = Hash2D(ix, iy);
+		float n10 = Hash2D(ix + 1, iy);
+		float n01 = Hash2D(ix, iy + 1);
+		float n11 = Hash2D(ix + 1, iy + 1);
+
+		// Interpolation bilinéaire des 4 coins
+		float nx0 = Lerp(n00, n10, sx);
+		float nx1 = Lerp(n01, n11, sx);
+		float result = Lerp(nx0, nx1, sy);
+
+		// Normaliser pour bien couvrir la plage 0-1
+		return result;
+	}
+
+	// Hash 2D déterministe (retourne entre 0 et 1)
+	private float Hash2D(float x, float y)
+	{
+		// Utiliser plusieurs composantes pour plus de variation
+		float h = MathF.Sin(x * 127.1f + y * 311.7f + Seed * 0.1f) * 43758.5453123f;
+		h = h - MathF.Floor(h);
+
+		// Mélanger avec une seconde couche pour plus de randomness
+		float h2 = MathF.Sin(x * 269.5f + y * 183.3f + Seed * 0.2f) * 27183.1459f;
+		h2 = h2 - MathF.Floor(h2);
+
+		// Combiner les deux
+		return (h + h2) * 0.5f;
+	}
+
+	// Interpolation linéaire
+	private float Lerp(float a, float b, float t)
+	{
+		return a + (b - a) * t;
+	}
+
+	// Détermine le type de biome basé sur le Perlin Noise
+	private GameObject GetBiomeForChunk(Vector2Int chunkCoord)
+	{
+		float biomeNoise = GetPerlinNoise(chunkCoord.x, chunkCoord.y, BiomeNoiseScale);
+
+		// Debug : afficher les valeurs de bruit
+		string biomeType = biomeNoise < BiomeThreshold ? "Forêt" : "Plaines";
+		Log.Info($"Chunk ({chunkCoord.x}, {chunkCoord.y}) - Noise: {biomeNoise:F3} → {biomeType}");
+
+		// En dessous du seuil = Forêt, au-dessus = Plaines
+		if ( biomeNoise < BiomeThreshold )
 		{
-			return cachedMaster;
+			return ForestPrefab;
 		}
-
-		// Déterminer quelle structure devrait être à cette position
-		// On teste TOUTES les positions qui pourraient être le master (pour un chunk 2x2 max)
-		// On commence par les offsets les plus éloignés pour donner priorité aux grands chunks
-		Vector2Int? foundMaster = null;
-		int maxSize = 0;
-
-		for ( int offsetX = -1; offsetX <= 0; offsetX++ )
+		else
 		{
-			for ( int offsetY = -1; offsetY <= 0; offsetY++ )
-			{
-				Vector2Int testMasterPos = new Vector2Int(chunkCoord.x + offsetX, chunkCoord.y + offsetY);
-				int chunkTypeIndex = GetChunkType(testMasterPos.x, testMasterPos.y);
-
-				if ( chunkTypeIndex < 0 || chunkTypeIndex >= ChunkPrefabs.Length )
-					continue;
-
-				var chunkComp = ChunkPrefabs[chunkTypeIndex].GetComponent<Chunk>();
-				if ( chunkComp == null )
-					continue;
-
-				// Vérifier si cette position master contient notre chunk cible
-				int endX = testMasterPos.x + chunkComp.GridWidth;
-				int endY = testMasterPos.y + chunkComp.GridHeight;
-
-				if ( chunkCoord.x >= testMasterPos.x && chunkCoord.x < endX &&
-					 chunkCoord.y >= testMasterPos.y && chunkCoord.y < endY )
-				{
-					// Calculer la taille totale de ce chunk
-					int size = chunkComp.GridWidth * chunkComp.GridHeight;
-
-					// Donner priorité au chunk le plus grand
-					if ( size > maxSize )
-					{
-						maxSize = size;
-						foundMaster = testMasterPos;
-					}
-				}
-			}
+			return PlainsPrefab;
 		}
-
-		// Utiliser le master trouvé ou la position elle-même par défaut
-		Vector2Int finalMaster = foundMaster ?? chunkCoord;
-		chunkToMaster[chunkCoord] = finalMaster;
-		return finalMaster;
 	}
 
 	private void LoadChunk(Vector2Int chunkCoord)
 	{
-		if ( ChunkPrefabs == null || ChunkPrefabs.Length == 0 )
+		// Déterminer le biome avec Perlin Noise
+		GameObject biomePrefab = GetBiomeForChunk(chunkCoord);
+
+		if ( biomePrefab == null )
+		{
+			Log.Warning($"Aucun prefab trouvé pour le chunk ({chunkCoord.x}, {chunkCoord.y})");
 			return;
-
-		// Obtenir le type de chunk basé sur les coordonnées
-		int chunkTypeIndex = GetChunkType(chunkCoord.x, chunkCoord.y);
-		GameObject chunkPrefab = ChunkPrefabs[chunkTypeIndex];
-
-		// Obtenir les dimensions du chunk
-		var chunkComp = chunkPrefab.GetComponent<Chunk>();
-		if ( chunkComp == null )
-			return;
-
-		int gridWidth = chunkComp.GridWidth;
-		int gridHeight = chunkComp.GridHeight;
+		}
 
 		// Placer le chunk dans le monde
-		GameObject chunkObj = PlaceChunk(chunkPrefab, chunkCoord);
+		GameObject chunkObj = PlaceChunk(biomePrefab, chunkCoord);
 
-		// Marquer toutes les positions occupées par ce chunk multi-grille
-		for ( int x = 0; x < gridWidth; x++ )
+		// Enregistrer le chunk
+		loadedChunks[chunkCoord] = chunkObj;
+
+		// Générer les objets (arbres, etc.) avec le second Perlin Noise
+		GenerateObjects(chunkObj, chunkCoord);
+
+		Log.Info($"Chunk chargé - Position: ({chunkCoord.x}, {chunkCoord.y}), Biome: {biomePrefab.Name}");
+	}
+
+	// Génère des objets dans le chunk (arbres, rochers, etc.)
+	private void GenerateObjects(GameObject chunk, Vector2Int chunkCoord)
+	{
+		// Vérifier si c'est une forêt
+		float biomeNoise = GetPerlinNoise(chunkCoord.x, chunkCoord.y, BiomeNoiseScale);
+		bool isForest = biomeNoise < BiomeThreshold;
+
+		if ( !isForest || TreePrefabs == null || TreePrefabs.Length == 0 )
+			return;
+
+		// Générer des arbres dans la forêt
+		int treeCount = 0;
+		Random random = new Random(Seed + chunkCoord.x * 73856093 + chunkCoord.y * 19349663);
+
+		// Essayer de placer des arbres à différentes positions
+		for ( int i = 0; i < TreesPerChunk * 2; i++ )
 		{
-			for ( int y = 0; y < gridHeight; y++ )
+			// Position aléatoire dans le chunk
+			float localX = (float)random.NextDouble() * ChunkSize;
+			float localY = (float)random.NextDouble() * ChunkSize;
+
+			// Utiliser Perlin noise pour décider si on place un arbre ici
+			float worldX = chunkCoord.x * ChunkSize + localX;
+			float worldY = chunkCoord.y * ChunkSize + localY;
+			float treeNoise = GetPerlinNoise((int)worldX, (int)worldY, TreeNoiseScale, seedOffset: 5000);
+
+			// Placer un arbre si le bruit est favorable
+			if ( treeNoise > (1f - TreeDensity) && treeCount < TreesPerChunk )
 			{
-				Vector2Int occupiedPos = new Vector2Int(chunkCoord.x + x, chunkCoord.y + y);
+				// Choisir un prefab d'arbre aléatoire
+				GameObject treePrefab = TreePrefabs[random.Next(TreePrefabs.Length)];
+				GameObject tree = treePrefab.Clone();
 
-				// Toutes les positions pointent vers le même GameObject master
-				loadedChunks[occupiedPos] = chunkObj;
+				// Positionner l'arbre
+				tree.WorldPosition = new Vector3(worldX, worldY, 0);
 
-				// Toutes les positions pointent vers la position master
-				chunkToMaster[occupiedPos] = chunkCoord;
+				// Rotation aléatoire
+				tree.WorldRotation = Rotation.FromYaw(random.Next(0, 360));
+
+				// Attacher au chunk pour le déchargement automatique
+				tree.SetParent(chunk);
+
+				treeCount++;
 			}
 		}
 
-		Log.Info($"Chunk chargé - Type: {chunkTypeIndex}, Position master: ({chunkCoord.x}, {chunkCoord.y}), Taille: {gridWidth}x{gridHeight}");
+		if ( treeCount > 0 )
+		{
+			Log.Info($"Chunk ({chunkCoord.x}, {chunkCoord.y}) - {treeCount} arbres générés");
+		}
 	}
 
 	private void UnloadDistantChunks(int playerChunkX, int playerChunkY)
 	{
-		HashSet<Vector2Int> masterChunksToUnload = new HashSet<Vector2Int>();
+		List<Vector2Int> chunksToUnload = new List<Vector2Int>();
 
-		// Identifier les chunks master trop éloignés
 		foreach ( var kvp in loadedChunks )
 		{
 			Vector2Int chunkCoord = kvp.Key;
+			int distanceX = Math.Abs(chunkCoord.x - playerChunkX);
+			int distanceY = Math.Abs(chunkCoord.y - playerChunkY);
 
-			// Obtenir la position master de ce chunk
-			if ( !chunkToMaster.TryGetValue(chunkCoord, out Vector2Int masterPos) )
-				continue;
-
-			// Vérifier la distance depuis la position master
-			int distanceX = Math.Abs(masterPos.x - playerChunkX);
-			int distanceY = Math.Abs(masterPos.y - playerChunkY);
-
-			// Si le chunk master est en dehors de la distance de rendu, le marquer
 			if ( distanceX > RenderDistance || distanceY > RenderDistance )
 			{
-				masterChunksToUnload.Add(masterPos);
+				chunksToUnload.Add(chunkCoord);
 			}
 		}
 
-		// Décharger les chunks master marqués
-		foreach ( var masterPos in masterChunksToUnload )
+		foreach ( var chunkCoord in chunksToUnload )
 		{
-			if ( !loadedChunks.TryGetValue(masterPos, out GameObject chunkObj) )
-				continue;
-
-			// Obtenir les dimensions du chunk pour nettoyer toutes les positions occupées
-			var chunkComp = chunkObj.GetComponent<Chunk>();
-			if ( chunkComp != null )
+			if ( loadedChunks.TryGetValue(chunkCoord, out GameObject chunkObj) )
 			{
-				for ( int x = 0; x < chunkComp.GridWidth; x++ )
-				{
-					for ( int y = 0; y < chunkComp.GridHeight; y++ )
-					{
-						Vector2Int occupiedPos = new Vector2Int(masterPos.x + x, masterPos.y + y);
-						loadedChunks.Remove(occupiedPos);
-						chunkToMaster.Remove(occupiedPos);
-					}
-				}
+				chunkObj.Destroy();
+				loadedChunks.Remove(chunkCoord);
 			}
-
-			// Détruire l'objet
-			chunkObj.Destroy();
 		}
 	}
 
